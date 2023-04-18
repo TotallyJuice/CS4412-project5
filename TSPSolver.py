@@ -17,6 +17,7 @@ from TSPClasses import *
 import heapq
 import itertools
 import copy
+from queue import PriorityQueue
 
 
 
@@ -192,6 +193,42 @@ class TSPSolver:
 		
 	def branchAndBound( self, time_allowance=60.0 ):
 		self.reset()
+
+		queue = PriorityQueue()
+		cities = self.scenario.getCities()
+
+		self.startTimer()
+
+		bssf = self.greedy(time_allowance / 10)
+
+		initState = PartialSolution(cities)
+
+		queue.put(initState)
+
+		while(not queue.empty()):
+			state = queue.get()
+			if(state.bound < bssf['cost']):
+				if(len(state.route) == len(cities)):
+					route = []
+					for cityNum in state.route:
+						route.append(cities[cityNum])
+					bssf = self.createSolution(route)
+				else:
+					children = state.createSubProblems()
+					
+					
+					for child in children:
+						if(child.bound < math.inf):
+							queue.put(child)
+							
+					
+
+
+		self.stopTimer()
+
+		return bssf
+
+
 
 
 

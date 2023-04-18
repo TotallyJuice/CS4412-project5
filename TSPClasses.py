@@ -5,6 +5,7 @@ import math
 import numpy as np
 import random
 import time
+import copy
 
 
 
@@ -187,3 +188,87 @@ class City:
 
 		return int(math.ceil(cost * self.MAP_SCALE))
 
+
+class PartialSolution:
+
+	def __init__(self, cities):
+		self.costMatrix = [] #[from][to]
+		self.route = []
+		self.fillCostMatrix(cities)
+		self.bound = 0
+		self.reduceCostMatrix()
+		self.route = [0]
+
+	def __cmp__(self, other):
+		return self.bound - other.bound
+
+	def __lt__(self, other):
+		return self.bound < other.bound
+
+	def fillCostMatrix(self, cities):
+		for fromCity in cities:
+			row = []
+			for toCity in cities:
+				row.append(fromCity.costTo(toCity))
+
+			self.costMatrix.append(row)
+
+	def reduceCostMatrix(self):
+		#reduce rows
+		
+		for i,row in enumerate(self.costMatrix):
+			if(not (i in self.route)):
+				minCost = math.inf
+				for cost in row:
+					if(cost < minCost):
+						minCost = cost
+						
+				for i,cost in enumerate(row):
+					row[i] = cost - minCost
+
+				self.bound += minCost
+			
+
+		#reduce columns
+
+		for col in range(len(self.costMatrix[0])):
+			if(not (col in self.route)):
+				minCost = math.inf
+				for row in self.costMatrix:
+					if(row[col] < minCost):
+						minCost = row[col]
+					
+				for row in self.costMatrix:
+					row[col] = row[col] - minCost
+
+				self.bound += minCost
+
+
+	def createSubProblems(self):
+
+		ret = []
+
+		startCity = self.route[-1]
+
+		#for each possible next city
+		for nextCity in range(len(self.costMatrix)):
+			#deep copy
+			child = copy.deepcopy(self)
+			#add city to route
+			child.route.append(nextCity)
+			#add cost to go to city
+			child.bound += child.costMatrix[startCity][nextCity]
+			
+			#set row column to inf
+			for i in range(len(child.costMatrix)):
+				child.costMatrix[i][nextCity] = math.inf
+				child.costMatrix[startCity][i] = math.inf
+			#set mirror to inf
+			child.costMatrix[nextCity][startCity] = math.inf
+			#reduce matrix
+			
+			child.reduceCostMatrix()
+			#add to ret
+			ret.append(child)
+
+		return ret
