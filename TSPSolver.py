@@ -16,15 +16,55 @@ import numpy as np
 from TSPClasses import *
 import heapq
 import itertools
+import copy
 
 
 
 class TSPSolver:
 	def __init__( self, gui_view ):
 		self.scenario = None
+		self.startTime = 0;
+		self.endTime = 0;
+		self.count = 0; # number solutions
+		self.max = 0; # max queue size
+		self.total = 0; # total states
+		self.pruned = 0; # pruned states 
 
 	def setupWithScenario( self, scenario ):
 		self.scenario = scenario
+
+
+	def startTimer(self):
+		self.startTime = time.time()
+
+	def stopTimer(self):
+		self.endTime = time.time()
+
+	def createSolution(self, route):
+
+		solution = TSPSolution(route)
+
+		results = {}
+		results['time'] = self.endTime - self.startTime
+		results['cost'] = solution.cost
+		results['count'] = self.count
+		results['soln'] = solution
+		results['max'] = self.max
+		results['total'] = self.total
+		results['pruned'] = self.pruned
+		return results
+
+	def checkSolutionCost(self, route):
+		solution = TSPSolution(route)
+		return solution.cost
+
+	def reset(self):
+		self.startTime = 0;
+		self.endTime = 0;
+		self.count = 0; # number solutions
+		self.max = 0; # max queue size
+		self.total = 0; # total states
+		self.pruned = 0; # pruned states 
 
 
 	''' <summary>
@@ -82,7 +122,62 @@ class TSPSolver:
 	'''
 
 	def greedy( self,time_allowance=60.0 ):
-		pass
+		self.reset()
+
+		cities = self.scenario.getCities()
+
+		startCity = 0
+		
+		self.startTimer()
+
+		bestRoute = None
+		bestRouteLen = math.inf
+
+		while startCity < len(cities):
+			unvisitedCities = copy.deepcopy(cities)
+			visitedCities = []
+
+			visitedCities.append(unvisitedCities[startCity])
+			unvisitedCities.pop(startCity)
+
+			validPath = True
+
+			while len(unvisitedCities) > 0 and validPath:
+				minlen = math.inf
+				bestCity = None
+
+				lastVisited = visitedCities[-1]
+
+				for city in unvisitedCities:
+					l = lastVisited.costTo(city)
+					if l < minlen:
+						minlen = l
+						bestCity = city
+
+				if(bestCity == None):
+					validPath = False
+				else:
+					visitedCities.append(bestCity)
+					unvisitedCities.remove(bestCity)
+				
+			startCity += 1
+
+			routeLen = self.checkSolutionCost(visitedCities)
+
+			if routeLen < bestRouteLen and validPath:
+				bestRouteLen = routeLen
+				bestRoute = visitedCities
+
+			if(time.time() - self.startTime > time_allowance):
+				self.stopTimer()
+				results = self.createSolution(bestRoute)
+				return results
+
+
+		self.stopTimer()
+
+		results = self.createSolution(bestRoute)
+		return results
 	
 	
 	
@@ -96,7 +191,7 @@ class TSPSolver:
 	'''
 		
 	def branchAndBound( self, time_allowance=60.0 ):
-		pass
+		self.reset()
 
 
 
@@ -110,7 +205,7 @@ class TSPSolver:
 	'''
 		
 	def fancy( self,time_allowance=60.0 ):
-		pass
+		self.reset()
 		
 
 
