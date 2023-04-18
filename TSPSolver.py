@@ -21,10 +21,10 @@ import itertools
 
 class TSPSolver:
 	def __init__( self, gui_view ):
-		self._scenario = None
+		self.scenario = None
 
 	def setupWithScenario( self, scenario ):
-		self._scenario = scenario
+		self.scenario = scenario
 
 
 	''' <summary>
@@ -40,7 +40,7 @@ class TSPSolver:
 	
 	def defaultRandomTour( self, time_allowance=60.0 ):
 		results = {}
-		cities = self._scenario.getCities()
+		cities = self.scenario.getCities()
 		ncities = len(cities)
 		foundTour = False
 		count = 0
