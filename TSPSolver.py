@@ -135,6 +135,8 @@ class TSPSolver:
 		bestRouteLen = math.inf
 
 		while startCity < len(cities):
+			self.count += 1
+
 			unvisitedCities = copy.deepcopy(cities)
 			visitedCities = []
 
@@ -200,7 +202,7 @@ class TSPSolver:
 		self.startTimer()
 
 		bssf = self.greedy(time_allowance / 10)
-
+		
 		initState = PartialSolution(cities)
 
 		queue.put(initState)
@@ -213,6 +215,7 @@ class TSPSolver:
 					for cityNum in state.route:
 						route.append(cities[cityNum])
 					bssf = self.createSolution(route)
+					self.count += 1
 				else:
 					children = state.createSubProblems()
 					
@@ -220,13 +223,26 @@ class TSPSolver:
 					for child in children:
 						if(child.bound < math.inf):
 							queue.put(child)
+							self.total += 1
+
+					if(queue.qsize() > self.max):
+						self.max = queue.qsize()
+			
+			else:
+				self.pruned += 1
+
+			if(time.time() - self.startTime > time_allowance):
+				self.stopTimer()
+				
+				return self.createSolution(bssf['soln'].route)
+			
 							
 					
 
 
 		self.stopTimer()
-
-		return bssf
+		
+		return self.createSolution(bssf['soln'].route)
 
 
 
