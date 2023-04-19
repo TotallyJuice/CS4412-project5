@@ -41,6 +41,7 @@ class TSPSolver:
 	def stopTimer(self):
 		self.endTime = time.time()
 
+	#generates a solution as well as all the statistical data
 	def createSolution(self, route):
 
 		solution = TSPSolution(route)
@@ -55,10 +56,12 @@ class TSPSolver:
 		results['pruned'] = self.pruned
 		return results
 
+	#returns the cost of a route
 	def checkSolutionCost(self, route):
 		solution = TSPSolution(route)
 		return solution.cost
 
+	#resets the class variables at the start of each solve
 	def reset(self):
 		self.startTime = 0;
 		self.endTime = 0;
@@ -134,23 +137,28 @@ class TSPSolver:
 		bestRoute = None
 		bestRouteLen = math.inf
 
+		#check every start city
 		while startCity < len(cities):
 			self.count += 1
 
+			#create lists of cities in and out of tour
 			unvisitedCities = copy.deepcopy(cities)
 			visitedCities = []
 
+			#move the starting city over
 			visitedCities.append(unvisitedCities[startCity])
 			unvisitedCities.pop(startCity)
 
 			validPath = True
 
+			#continue until all cities are visited or a dead end if found
 			while len(unvisitedCities) > 0 and validPath:
 				minlen = math.inf
 				bestCity = None
 
 				lastVisited = visitedCities[-1]
 
+				#find closest unvisited city
 				for city in unvisitedCities:
 					l = lastVisited.costTo(city)
 					if l < minlen:
@@ -165,12 +173,14 @@ class TSPSolver:
 				
 			startCity += 1
 
+			#remember which path is shortest 
 			routeLen = self.checkSolutionCost(visitedCities)
 
 			if routeLen < bestRouteLen and validPath:
 				bestRouteLen = routeLen
 				bestRoute = visitedCities
 
+			#check for timeout
 			if(time.time() - self.startTime > time_allowance):
 				self.stopTimer()
 				results = self.createSolution(bestRoute)
@@ -203,34 +213,42 @@ class TSPSolver:
 
 		bssf = self.greedy(time_allowance / 10)
 		
+		#create state with all cities unvisited
 		initState = PartialSolution(cities)
 
 		queue.put(initState)
 
+		#continue until queue is empty 
 		while(not queue.empty()):
 			state = queue.get()
+			#check if branch should be continued 
 			if(state.bound < bssf['cost']):
+				#check if complete route
 				if(len(state.route) == len(cities)):
+					#create new bssf
 					route = []
 					for cityNum in state.route:
 						route.append(cities[cityNum])
 					bssf = self.createSolution(route)
 					self.count += 1
 				else:
+					#expand tree
 					children = state.createSubProblems()
 					
 					
 					for child in children:
+						#check if branch is dead end
 						if(child.bound < math.inf):
 							queue.put(child)
 							self.total += 1
-
+					#record longest queue
 					if(queue.qsize() > self.max):
 						self.max = queue.qsize()
 			
 			else:
 				self.pruned += 1
 
+			#check for timeout
 			if(time.time() - self.startTime > time_allowance):
 				self.stopTimer()
 				

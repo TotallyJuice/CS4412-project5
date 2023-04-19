@@ -245,9 +245,10 @@ class PartialSolution:
 
 
 	def createSubProblems(self):
-
+		#list of children
 		ret = []
 
+		#start city for the next step
 		startCity = self.route[-1]
 
 		#for each possible next city
