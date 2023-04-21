@@ -139,7 +139,7 @@ class TSPSolver:
 
 		#check every start city
 		while startCity < len(cities):
-			self.count += 1
+			#self.count += 1
 
 			#create lists of cities in and out of tour
 			unvisitedCities = copy.deepcopy(cities)
@@ -237,10 +237,13 @@ class TSPSolver:
 					
 					
 					for child in children:
+						
+						self.total += 1
 						#check if branch is dead end
-						if(child.bound < math.inf):
+						if(child.bound < bssf['cost']):
 							queue.put(child)
-							self.total += 1
+						else:
+							self.pruned += 1
 					#record longest queue
 					if(queue.qsize() > self.max):
 						self.max = queue.qsize()
