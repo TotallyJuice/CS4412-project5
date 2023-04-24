@@ -298,8 +298,6 @@ class TSPSolver:
 
 
             city2 = self.getRandom(unvisitedCities)
-
-           
             tour.append(city2)
             unvisitedCities.remove(city2)
 
