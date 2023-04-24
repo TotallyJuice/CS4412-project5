@@ -279,32 +279,63 @@ class TSPSolver:
 	'''
 
 	#return the city that is not in the tour that is the shortest distance from a city in the tour
-	def getClosest(tour):
+	def getClosest(tour, unvisitedCities):
 		pass
 
 	#return a random city from the list
-	def getRandom(cities):
+	def getRandom(unvisitedCities):
 		pass
 
 	#return the city that is the furthest distance (but not inf) from a city in the tour
-	def getFurthest(tour):
+	def getFurthest(tour, unvisitedCities):
 		pass
 		
 	def fancy(self,time_allowance=60.0 ):
 		self.reset()
 
+		self.startTimer()
+
 		#select two start cities
-		#select a city
-		#select an adjacent city
+		#default first two cities in list
+		cities = self.scenario.getCities()
+		city1 = cities[0]
+		city2 = cities[1]
 
-		#while route < cities
+		tour = []
+		unvisitedCities = copy.deepcopy(cities)
 
-		#select next city
+		tour.append(city1)
+		unvisitedCities.remove(city1)
+		tour.append(city2)
+		unvisitedCities.remove(city2)
 
-		#for i = 1 i < len(tour) i++
-		#check if position is new min tour route
+		#while tour < cities
+		while(len(tour) < len(cities)):
 
-		#insert chosen city 
+			#select next city
+			newCity = getRandom(unvisitedCities)
+			newCity = getClosest(tour, unvisitedCities)
+			newCity = getFurthest(tour, unvisitedCities)
+
+			bestCost = math.inf
+			insertBefore = 1
+
+			for i in range(1,len(tour)):
+			#check if position is new min tour route
+				testTour = tour[:i] + [newCity] + tour[i:]
+				cost = checkSolutionCost(self, testTour)
+				if(cost < bestCost):
+					bestCost = cost
+					insertBefore = i
+
+
+			#insert chosen city 
+			tour = tour[:insertBefore] + [newCity] + tour[insertBefore:]
+
+		self.stopTimer()
+		
+		return self.createSolution(tour)
+	
 		
 
 
