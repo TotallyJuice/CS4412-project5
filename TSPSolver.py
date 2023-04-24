@@ -261,9 +261,23 @@ class TSPSolver:
         algorithm</returns> 
     '''
 
-    #return the city that is not in the tour that is the shortest distance from a city in the tour
-    #def getClosest(tour, unvisitedCities):
-        #pass
+	#return the city that is not in the tour that is the shortest distance from a city in the tour
+	def getClosest(self, tour, unvisitedCities):
+
+		closest_city = None
+		closest_dist = math.inf
+
+		for city in unvisitedCities:
+
+			for i in range(len(tour)):
+				dist = self.scenario.getDistance(tour[i], city)
+
+				if dist < closest_dist:
+
+					closest_city = city
+					closest_dist = dist
+					
+		return closest_city
 
 
     # return a random city from the list
@@ -307,14 +321,14 @@ class TSPSolver:
             tour = []
             unvisitedCities = copy.deepcopy(cities)
 
-            city1 = self.getRandom(unvisitedCities)
-            tour.append(city1)
-            unvisitedCities.remove(city1)
+			city1 = self.getRandom(unvisitedCities)
+			tour.append(city1)
+			unvisitedCities.remove(city1)
 
 
-            city2 = self.getRandom(unvisitedCities)
-            tour.append(city2)
-            unvisitedCities.remove(city2)
+			city2 = self.getRandom(unvisitedCities)
+			tour.append(city2)
+			unvisitedCities.remove(city2)
 
             #while tour < cities
             while(len(tour) < len(cities)):
