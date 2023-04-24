@@ -292,11 +292,14 @@ class TSPSolver:
             tour = []
             unvisitedCities = copy.deepcopy(cities)
 
-            city1 = unvisitedCities[0]
-            city2 = unvisitedCities[1]
-
+            city1 = self.getRandom(unvisitedCities)
             tour.append(city1)
             unvisitedCities.remove(city1)
+
+
+            city2 = self.getRandom(unvisitedCities)
+
+           
             tour.append(city2)
             unvisitedCities.remove(city2)
 
