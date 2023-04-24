@@ -277,9 +277,34 @@ class TSPSolver:
 		best solution found.  You may use the other three field however you like.
 		algorithm</returns> 
 	'''
+
+	#return the city that is not in the tour that is the shortest distance from a city in the tour
+	def getClosest(tour):
+		pass
+
+	#return a random city from the list
+	def getRandom(cities):
+		pass
+
+	#return the city that is the furthest distance (but not inf) from a city in the tour
+	def getFurthest(tour):
+		pass
 		
-	def fancy( self,time_allowance=60.0 ):
+	def fancy(self,time_allowance=60.0 ):
 		self.reset()
+
+		#select two start cities
+		#select a city
+		#select an adjacent city
+
+		#while route < cities
+
+		#select next city
+
+		#for i = 1 i < len(tour) i++
+		#check if position is new min tour route
+
+		#insert chosen city 
 		
 
 
