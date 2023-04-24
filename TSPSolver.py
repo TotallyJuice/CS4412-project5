@@ -262,66 +262,67 @@ class TSPSolver:
 	'''
 
 	#return the city that is not in the tour that is the shortest distance from a city in the tour
-	def getClosest(tour, unvisitedCities):
-		pass
+	#def getClosest(tour, unvisitedCities):
+	    #pass
 
-	#return a random city from the list
-	def getRandom(unvisitedCities):
-		pass
+	
     # return a random city from the list
-    def getRandom(cities):
+    def getRandom(self, cities):
 
-        return random.choice(cities.getRandom())
+        return random.choice(cities)
 
 	#return the city that is the furthest distance (but not inf) from a city in the tour
-	def getFurthest(tour, unvisitedCities):
-		pass
+	#def getFurthest(tour, unvisitedCities):
+		#pass
 		
-	def fancy(self,time_allowance=60.0 ):
-		self.reset()
+    def fancy(self,time_allowance=60.0 ):
+        self.reset()
 
-		self.startTimer()
+        self.startTimer()
 
-		#select two start cities
-		#default first two cities in list
-		cities = self.scenario.getCities()
-		city1 = cities[0]
-		city2 = cities[1]
+        #select two start cities
+        #default first two cities in list
+        cities = self.scenario.getCities()
+        
 
-		tour = []
-		unvisitedCities = copy.deepcopy(cities)
+        tour = []
+        unvisitedCities = copy.deepcopy(cities)
 
-		tour.append(city1)
-		unvisitedCities.remove(city1)
-		tour.append(city2)
-		unvisitedCities.remove(city2)
+        city1 = unvisitedCities[0]
+        city2 = unvisitedCities[1]
 
-		#while tour < cities
-		while(len(tour) < len(cities)):
+        tour.append(city1)
+        unvisitedCities.remove(city1)
+        tour.append(city2)
+        unvisitedCities.remove(city2)
 
-			#select next city
-			newCity = getRandom(unvisitedCities)
-			#newCity = getClosest(tour, unvisitedCities)
-			#newCity = getFurthest(tour, unvisitedCities)
+        #while tour < cities
+        while(len(tour) < len(cities)):
 
-			bestCost = math.inf
-			insertBefore = 1
+            #select next city
+            newCity = self.getRandom(unvisitedCities)
+            #newCity = self.getClosest(tour, unvisitedCities)
+            #newCity = self.getFurthest(tour, unvisitedCities)
 
-			for i in range(1,len(tour)):
-			#check if position is new min tour route
-				testTour = tour[:i] + [newCity] + tour[i:]
-				cost = checkSolutionCost(self, testTour)
-				if(cost < bestCost):
-					bestCost = cost
-					insertBefore = i
+            bestCost = math.inf
+            insertBefore = 1
+
+            for i in range(1,len(tour)):
+            #check if position is new min tour route
+                testTour = tour[:i] + [newCity] + tour[i:]
+                cost = self.checkSolutionCost(testTour)
+                if(cost < bestCost):
+                    bestCost = cost
+                    insertBefore = i
 
 
-			#insert chosen city 
-			tour = tour[:insertBefore] + [newCity] + tour[insertBefore:]
+            #insert chosen city 
+            unvisitedCities.remove(newCity)
+            tour = tour[:insertBefore] + [newCity] + tour[insertBefore:]
 
-		self.stopTimer()
-		
-		return self.createSolution(tour)
+        self.stopTimer()
+
+        return self.createSolution(tour)
 	
 		
 
