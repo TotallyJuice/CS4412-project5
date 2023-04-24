@@ -1,15 +1,13 @@
 #!/usr/bin/python3
 
 from which_pyqt import PYQT_VER
+
 if PYQT_VER == 'PYQT5':
-	from PyQt5.QtCore import QLineF, QPointF
+    from PyQt5.QtCore import QLineF, QPointF
 elif PYQT_VER == 'PYQT4':
-	from PyQt4.QtCore import QLineF, QPointF
+    from PyQt4.QtCore import QLineF, QPointF
 else:
-	raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
-
-
-
+    raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
 
 import time
 import numpy as np
@@ -18,60 +16,58 @@ import heapq
 import itertools
 import copy
 from queue import PriorityQueue
-
+import random
 
 
 class TSPSolver:
-	def __init__( self, gui_view ):
-		self.scenario = None
-		self.startTime = 0;
-		self.endTime = 0;
-		self.count = 0; # number solutions
-		self.max = 0; # max queue size
-		self.total = 0; # total states
-		self.pruned = 0; # pruned states 
+    def __init__(self, gui_view):
+        self.scenario = None
+        self.startTime = 0;
+        self.endTime = 0;
+        self.count = 0;  # number solutions
+        self.max = 0;  # max queue size
+        self.total = 0;  # total states
+        self.pruned = 0;  # pruned states
 
-	def setupWithScenario( self, scenario ):
-		self.scenario = scenario
+    def setupWithScenario(self, scenario):
+        self.scenario = scenario
 
+    def startTimer(self):
+        self.startTime = time.time()
 
-	def startTimer(self):
-		self.startTime = time.time()
+    def stopTimer(self):
+        self.endTime = time.time()
 
-	def stopTimer(self):
-		self.endTime = time.time()
+    # generates a solution as well as all the statistical data
+    def createSolution(self, route):
 
-	#generates a solution as well as all the statistical data
-	def createSolution(self, route):
+        solution = TSPSolution(route)
 
-		solution = TSPSolution(route)
+        results = {}
+        results['time'] = self.endTime - self.startTime
+        results['cost'] = solution.cost
+        results['count'] = self.count
+        results['soln'] = solution
+        results['max'] = self.max
+        results['total'] = self.total
+        results['pruned'] = self.pruned
+        return results
 
-		results = {}
-		results['time'] = self.endTime - self.startTime
-		results['cost'] = solution.cost
-		results['count'] = self.count
-		results['soln'] = solution
-		results['max'] = self.max
-		results['total'] = self.total
-		results['pruned'] = self.pruned
-		return results
+    # returns the cost of a route
+    def checkSolutionCost(self, route):
+        solution = TSPSolution(route)
+        return solution.cost
 
-	#returns the cost of a route
-	def checkSolutionCost(self, route):
-		solution = TSPSolution(route)
-		return solution.cost
+    # resets the class variables at the start of each solve
+    def reset(self):
+        self.startTime = 0;
+        self.endTime = 0;
+        self.count = 0;  # number solutions
+        self.max = 0;  # max queue size
+        self.total = 0;  # total states
+        self.pruned = 0;  # pruned states
 
-	#resets the class variables at the start of each solve
-	def reset(self):
-		self.startTime = 0;
-		self.endTime = 0;
-		self.count = 0; # number solutions
-		self.max = 0; # max queue size
-		self.total = 0; # total states
-		self.pruned = 0; # pruned states 
-
-
-	''' <summary>
+    ''' <summary>
 		This is the entry point for the default solver
 		which just finds a valid random tour.  Note this could be used to find your
 		initial BSSF.
@@ -81,39 +77,38 @@ class TSPSolver:
 		solution found, and three null values for fields not used for this 
 		algorithm</returns> 
 	'''
-	
-	def defaultRandomTour( self, time_allowance=60.0 ):
-		results = {}
-		cities = self.scenario.getCities()
-		ncities = len(cities)
-		foundTour = False
-		count = 0
-		bssf = None
-		start_time = time.time()
-		while not foundTour and time.time()-start_time < time_allowance:
-			# create a random permutation
-			perm = np.random.permutation( ncities )
-			route = []
-			# Now build the route using the random permutation
-			for i in range( ncities ):
-				route.append( cities[ perm[i] ] )
-			bssf = TSPSolution(route)
-			count += 1
-			if bssf.cost < np.inf:
-				# Found a valid route
-				foundTour = True
-		end_time = time.time()
-		results['cost'] = bssf.cost if foundTour else math.inf
-		results['time'] = end_time - start_time
-		results['count'] = count
-		results['soln'] = bssf
-		results['max'] = None
-		results['total'] = None
-		results['pruned'] = None
-		return results
 
+    def defaultRandomTour(self, time_allowance=60.0):
+        results = {}
+        cities = self.scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        count = 0
+        bssf = None
+        start_time = time.time()
+        while not foundTour and time.time() - start_time < time_allowance:
+            # create a random permutation
+            perm = np.random.permutation(ncities)
+            route = []
+            # Now build the route using the random permutation
+            for i in range(ncities):
+                route.append(cities[perm[i]])
+            bssf = TSPSolution(route)
+            count += 1
+            if bssf.cost < np.inf:
+                # Found a valid route
+                foundTour = True
+        end_time = time.time()
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = count
+        results['soln'] = bssf
+        results['max'] = None
+        results['total'] = None
+        results['pruned'] = None
+        return results
 
-	''' <summary>
+    ''' <summary>
 		This is the entry point for the greedy solver, which you must implement for 
 		the group project (but it is probably a good idea to just do it for the branch-and
 		bound project as a way to get your feet wet).  Note this could be used to find your
@@ -125,76 +120,73 @@ class TSPSolver:
 		algorithm</returns> 
 	'''
 
-	def greedy( self,time_allowance=60.0 ):
-		self.reset()
+    def greedy(self, time_allowance=60.0):
+        self.reset()
 
-		cities = self.scenario.getCities()
+        cities = self.scenario.getCities()
 
-		startCity = 0
-		
-		self.startTimer()
+        startCity = 0
 
-		bestRoute = None
-		bestRouteLen = math.inf
+        self.startTimer()
 
-		#check every start city
-		while startCity < len(cities):
-			#self.count += 1
+        bestRoute = None
+        bestRouteLen = math.inf
 
-			#create lists of cities in and out of tour
-			unvisitedCities = copy.deepcopy(cities)
-			visitedCities = []
+        # check every start city
+        while startCity < len(cities):
+            # self.count += 1
 
-			#move the starting city over
-			visitedCities.append(unvisitedCities[startCity])
-			unvisitedCities.pop(startCity)
+            # create lists of cities in and out of tour
+            unvisitedCities = copy.deepcopy(cities)
+            visitedCities = []
 
-			validPath = True
+            # move the starting city over
+            visitedCities.append(unvisitedCities[startCity])
+            unvisitedCities.pop(startCity)
 
-			#continue until all cities are visited or a dead end if found
-			while len(unvisitedCities) > 0 and validPath:
-				minlen = math.inf
-				bestCity = None
+            validPath = True
 
-				lastVisited = visitedCities[-1]
+            # continue until all cities are visited or a dead end if found
+            while len(unvisitedCities) > 0 and validPath:
+                minlen = math.inf
+                bestCity = None
 
-				#find closest unvisited city
-				for city in unvisitedCities:
-					l = lastVisited.costTo(city)
-					if l < minlen:
-						minlen = l
-						bestCity = city
+                lastVisited = visitedCities[-1]
 
-				if(bestCity == None):
-					validPath = False
-				else:
-					visitedCities.append(bestCity)
-					unvisitedCities.remove(bestCity)
-				
-			startCity += 1
+                # find closest unvisited city
+                for city in unvisitedCities:
+                    l = lastVisited.costTo(city)
+                    if l < minlen:
+                        minlen = l
+                        bestCity = city
 
-			#remember which path is shortest 
-			routeLen = self.checkSolutionCost(visitedCities)
+                if (bestCity == None):
+                    validPath = False
+                else:
+                    visitedCities.append(bestCity)
+                    unvisitedCities.remove(bestCity)
 
-			if routeLen < bestRouteLen and validPath:
-				bestRouteLen = routeLen
-				bestRoute = visitedCities
+            startCity += 1
 
-			#check for timeout
-			if(time.time() - self.startTime > time_allowance):
-				self.stopTimer()
-				results = self.createSolution(bestRoute)
-				return results
+            # remember which path is shortest
+            routeLen = self.checkSolutionCost(visitedCities)
 
+            if routeLen < bestRouteLen and validPath:
+                bestRouteLen = routeLen
+                bestRoute = visitedCities
 
-		self.stopTimer()
+            # check for timeout
+            if (time.time() - self.startTime > time_allowance):
+                self.stopTimer()
+                results = self.createSolution(bestRoute)
+                return results
 
-		results = self.createSolution(bestRoute)
-		return results
-	
-	
-	
-	''' <summary>
+        self.stopTimer()
+
+        results = self.createSolution(bestRoute)
+        return results
+
+    ''' <summary>
 		This is the entry point for the branch-and-bound algorithm that you will implement
 		</summary>
 		<returns>results dictionary for GUI that contains three ints: cost of best solution, 
@@ -202,74 +194,65 @@ class TSPSolver:
 		not include the initial BSSF), the best solution found, and three more ints: 
 		max queue size, total number of states created, and number of pruned states.</returns> 
 	'''
-		
-	def branchAndBound( self, time_allowance=60.0 ):
-		self.reset()
 
-		queue = PriorityQueue()
-		cities = self.scenario.getCities()
+    def branchAndBound(self, time_allowance=60.0):
+        self.reset()
 
-		self.startTimer()
+        queue = PriorityQueue()
+        cities = self.scenario.getCities()
 
-		bssf = self.greedy(time_allowance / 10)
-		
-		#create state with all cities unvisited
-		initState = PartialSolution(cities)
+        self.startTimer()
 
-		queue.put(initState)
+        bssf = self.greedy(time_allowance / 10)
 
-		#continue until queue is empty 
-		while(not queue.empty()):
-			state = queue.get()
-			#check if branch should be continued 
-			if(state.bound < bssf['cost']):
-				#check if complete route
-				if(len(state.route) == len(cities)):
-					#create new bssf
-					route = []
-					for cityNum in state.route:
-						route.append(cities[cityNum])
-					bssf = self.createSolution(route)
-					self.count += 1
-				else:
-					#expand tree
-					children = state.createSubProblems()
-					
-					
-					for child in children:
-						
-						self.total += 1
-						#check if branch is dead end
-						if(child.bound < bssf['cost']):
-							queue.put(child)
-						else:
-							self.pruned += 1
-					#record longest queue
-					if(queue.qsize() > self.max):
-						self.max = queue.qsize()
-			
-			else:
-				self.pruned += 1
+        # create state with all cities unvisited
+        initState = PartialSolution(cities)
 
-			#check for timeout
-			if(time.time() - self.startTime > time_allowance):
-				self.stopTimer()
-				
-				return self.createSolution(bssf['soln'].route)
-			
-							
-					
+        queue.put(initState)
 
+        # continue until queue is empty
+        while (not queue.empty()):
+            state = queue.get()
+            # check if branch should be continued
+            if (state.bound < bssf['cost']):
+                # check if complete route
+                if (len(state.route) == len(cities)):
+                    # create new bssf
+                    route = []
+                    for cityNum in state.route:
+                        route.append(cities[cityNum])
+                    bssf = self.createSolution(route)
+                    self.count += 1
+                else:
+                    # expand tree
+                    children = state.createSubProblems()
 
-		self.stopTimer()
-		
-		return self.createSolution(bssf['soln'].route)
+                    for child in children:
 
+                        self.total += 1
+                        # check if branch is dead end
+                        if (child.bound < bssf['cost']):
+                            queue.put(child)
+                        else:
+                            self.pruned += 1
+                    # record longest queue
+                    if (queue.qsize() > self.max):
+                        self.max = queue.qsize()
 
+            else:
+                self.pruned += 1
 
+            # check for timeout
+            if (time.time() - self.startTime > time_allowance):
+                self.stopTimer()
 
+                return self.createSolution(bssf['soln'].route)
 
-	''' <summary>
+        self.stopTimer()
+
+        return self.createSolution(bssf['soln'].route)
+
+    ''' <summary>
 		This is the entry point for the algorithm you'll write for your group project.
 		</summary>
 		<returns>results dictionary for GUI that contains three ints: cost of best solution, 
@@ -278,34 +261,31 @@ class TSPSolver:
 		algorithm</returns> 
 	'''
 
-	#return the city that is not in the tour that is the shortest distance from a city in the tour
-	def getClosest(tour):
-		pass
+    # return the city that is not in the tour that is the shortest distance from a city in the tour
+    def getClosest(tour):
+        pass
 
-	#return a random city from the list
-	def getRandom(cities):
-		pass
+    # return a random city from the list
+    def getRandom(cities):
 
-	#return the city that is the furthest distance (but not inf) from a city in the tour
-	def getFurthest(tour):
-		pass
-		
-	def fancy(self,time_allowance=60.0 ):
-		self.reset()
+        return random.choice(cities.getRandom())
 
-		#select two start cities
-		#select a city
-		#select an adjacent city
+    # return the city that is the furthest distance (but not inf) from a city in the tour
+    def getFurthest(tour):
+        pass
 
-		#while route < cities
+    def fancy(self, time_allowance=60.0):
+        self.reset()
 
-		#select next city
+    # select two start cities
+    # select a city
+    # select an adjacent city
 
-		#for i = 1 i < len(tour) i++
-		#check if position is new min tour route
+    # while route < cities
 
-		#insert chosen city 
-		
+    # select next city
 
+    # for i = 1 i < len(tour) i++
+    # check if position is new min tour route
 
-
+    # insert chosen city
