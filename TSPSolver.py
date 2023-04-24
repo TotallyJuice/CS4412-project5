@@ -283,46 +283,55 @@ class TSPSolver:
         #select two start cities
         #default first two cities in list
         cities = self.scenario.getCities()
+
+        bssfCost = math.inf
+        bssf = None
         
+        while(time.time() - self.startTime < time_allowance):
 
-        tour = []
-        unvisitedCities = copy.deepcopy(cities)
+            tour = []
+            unvisitedCities = copy.deepcopy(cities)
 
-        city1 = unvisitedCities[0]
-        city2 = unvisitedCities[1]
+            city1 = unvisitedCities[0]
+            city2 = unvisitedCities[1]
 
-        tour.append(city1)
-        unvisitedCities.remove(city1)
-        tour.append(city2)
-        unvisitedCities.remove(city2)
+            tour.append(city1)
+            unvisitedCities.remove(city1)
+            tour.append(city2)
+            unvisitedCities.remove(city2)
 
-        #while tour < cities
-        while(len(tour) < len(cities)):
+            #while tour < cities
+            while(len(tour) < len(cities)):
 
-            #select next city
-            newCity = self.getRandom(unvisitedCities)
-            #newCity = self.getClosest(tour, unvisitedCities)
-            #newCity = self.getFurthest(tour, unvisitedCities)
+                #select next city
+                newCity = self.getRandom(unvisitedCities)
+                #newCity = self.getClosest(tour, unvisitedCities)
+                #newCity = self.getFurthest(tour, unvisitedCities)
 
-            bestCost = math.inf
-            insertBefore = 1
+                bestCost = math.inf
+                insertBefore = 1
 
-            for i in range(1,len(tour)):
-            #check if position is new min tour route
-                testTour = tour[:i] + [newCity] + tour[i:]
-                cost = self.checkSolutionCost(testTour)
-                if(cost < bestCost):
-                    bestCost = cost
-                    insertBefore = i
+                for i in range(1,len(tour)):
+                #check if position is new min tour route
+                    testTour = tour[:i] + [newCity] + tour[i:]
+                    cost = self.checkSolutionCost(testTour)
+                    if(cost < bestCost):
+                        bestCost = cost
+                        insertBefore = i
 
 
-            #insert chosen city 
-            unvisitedCities.remove(newCity)
-            tour = tour[:insertBefore] + [newCity] + tour[insertBefore:]
+                #insert chosen city 
+                unvisitedCities.remove(newCity)
+                tour = tour[:insertBefore] + [newCity] + tour[insertBefore:]
+
+            totalCost = self.checkSolutionCost(tour)
+            if(totalCost < bssfCost):
+                bssfCost = totalCost
+                bssf = tour
 
         self.stopTimer()
 
-        return self.createSolution(tour)
+        return self.createSolution(bssf)
 	
 		
 
