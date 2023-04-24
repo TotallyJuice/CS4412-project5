@@ -301,8 +301,8 @@ class TSPSolver:
 
 			#select next city
 			newCity = getRandom(unvisitedCities)
-			newCity = getClosest(tour, unvisitedCities)
-			newCity = getFurthest(tour, unvisitedCities)
+			#newCity = getClosest(tour, unvisitedCities)
+			#newCity = getFurthest(tour, unvisitedCities)
 
 			bestCost = math.inf
 			insertBefore = 1
