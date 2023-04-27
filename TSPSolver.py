@@ -316,8 +316,11 @@ class TSPSolver:
         bssfCost = math.inf
         bssf = None
 
-        while(time.time() - self.startTime < time_allowance):
-
+        iii = 0
+        #while(time.time() - self.startTime < time_allowance):
+        while(iii < 100 and time.time() - self.startTime < time_allowance):
+            self.total += 1
+            iii += 1
             tour = []
             unvisitedCities = copy.deepcopy(cities)
 
@@ -331,11 +334,12 @@ class TSPSolver:
             unvisitedCities.remove(city2)
 
             #while tour < cities
+            
             while(len(tour) < len(cities)):
 
                 #select next city
-                #newCity = self.getRandom(unvisitedCities)
-                newCity = self.getClosest(tour, unvisitedCities)
+                newCity = self.getRandom(unvisitedCities)
+                #newCity = self.getClosest(tour, unvisitedCities)
                 #newCity = self.getFurthest(tour, unvisitedCities)
 
                 bestCost = math.inf
